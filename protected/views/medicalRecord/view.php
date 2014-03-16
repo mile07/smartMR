@@ -30,6 +30,18 @@ $this->menu=array(
 */
  ?>
 
+
+<div  id="answers">
+    <?php 
+    if ($model->answerCount > 0){?>
+         <h3>Answers:</h3>
+         <?php $this->renderPartial('_answers',array(
+            'medical_record'=>$model,
+            'answers'=>$model->answers,
+         )); ?>
+     <?php } ?>
+</div>
+<!--comment
 <div style="padding-top:10px">
     <?php
     $sections = Array();
@@ -63,3 +75,5 @@ $this->menu=array(
     run_tree($qtree,$sections);
     ?>
 </div>
+    
+    -->

@@ -4,9 +4,10 @@
  * This is the model class for table "{{answer}}".
  *
  * The followings are the available columns in table '{{answer}}':
- * @property string $text
- * @property integer $question_id
- * @property string $MR_id
+ * @property integer $id
+ * @property string $medical_record_id
+ * @property string $question_id
+ * @property string $answer
  */
 class Answer extends CActiveRecord
 {
@@ -26,10 +27,10 @@ class Answer extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('text, MR_id', 'safe'),
+			array('medical_record_id, question_id, answer', 'safe'),
 			// The following rule is used by search().
 			// @todo Please remove those attributes that should not be searched.
-			array('text, question_id, MR_id', 'safe', 'on'=>'search'),
+			array('id, medical_record_id, question_id, answer', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -41,6 +42,7 @@ class Answer extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
+            'medical_record' => array(self::BELONGS_TO, 'MedicalRecord','medical_record_id'),
 		);
 	}
 
@@ -50,9 +52,10 @@ class Answer extends CActiveRecord
 	public function attributeLabels()
 	{
 		return array(
-			'text' => 'Text',
+			'id' => 'ID',
+			'medical_record_id' => 'Medical Record',
 			'question_id' => 'Question',
-			'MR_id' => 'Mr',
+			'answer' => 'Answer',
 		);
 	}
 
@@ -74,9 +77,10 @@ class Answer extends CActiveRecord
 
 		$criteria=new CDbCriteria;
 
-		$criteria->compare('text',$this->text,true);
-		$criteria->compare('question_id',$this->question_id);
-		$criteria->compare('MR_id',$this->MR_id,true);
+		$criteria->compare('id',$this->id);
+		$criteria->compare('medical_record_id',$this->medical_record_id,true);
+		$criteria->compare('question_id',$this->question_id,true);
+		$criteria->compare('answer',$this->answer,true);
 
 		return new CActiveDataProvider($this, array(
 			'criteria'=>$criteria,

@@ -4,6 +4,7 @@
 /* @var $form CActiveForm */
 ?>
 
+
 <div class="form">
 
 <?php $form=$this->beginWidget('CActiveForm', array(
@@ -15,20 +16,41 @@
 	'enableAjaxValidation'=>false,
 )); ?>
 
-	<p class="note">Fields with <span class="required">*</span> are required.</p>
-
+<?php
+        if (isset($from_mr) and $from_mr){
+        }
+?>
+            <?php if (!(isset($from_mr) and $from_mr)){ ?>
+	php<p class="note">Fields with <span class="required">*</span> are required.</p>
+    <?php } ?>
 	<?php echo $form->errorSummary($model); ?>
 
 	<div class="row">
-		<?php echo $form->labelEx($model,'text'); ?>
-		<?php echo $form->textArea($model,'text',array('rows'=>6, 'cols'=>50)); ?>
-		<?php echo $form->error($model,'text'); ?>
+        <?php if (!(isset($from_mr) and $from_mr)){ ?>
+		<?php echo $form->labelEx($model,'medical_record_id'); ?>
+		<?php echo $form->textField($model,'medical_record_id'); ?>
+		<?php echo $form->error($model,'medical_record_id'); ?>
+        <?php } 
+        else {
+//            echo $form->labelEx($model,'medical_record_id'); 
+            echo $form->hiddenField($model,'medical_record_id'); 
+//            echo $form->error($model,'medical_record_id'); 
+        }
+        ?>
 	</div>
 
 	<div class="row">
-		<?php echo $form->labelEx($model,'MR_id'); ?>
-		<?php echo $form->textField($model,'MR_id'); ?>
-		<?php echo $form->error($model,'MR_id'); ?>
+        <?php if (!(isset($from_mr) and $from_mr)){ ?>
+		<?php echo $form->labelEx($model,'question_id'); ?>
+		<?php echo $form->textField($model,'question_id'); ?>
+		<?php echo $form->error($model,'question_id'); ?>
+        <?php } ?>
+	</div>
+
+	<div class="row">
+		<?php echo $form->labelEx($model,'answer'); ?>
+		<?php echo $form->textArea($model,'answer',array('rows'=>6, 'cols'=>50)); ?>
+		<?php echo $form->error($model,'answer'); ?>
 	</div>
 
 	<div class="row buttons">

@@ -37,6 +37,9 @@ class MedicalRecordController extends Controller
 	 */
 	public $layout='//layouts/column2';
     public $qtree;
+    public $answers;
+    public $model;
+    public $atree;
 
 	/**
 	 * @return array action filters
@@ -75,12 +78,7 @@ class MedicalRecordController extends Controller
 		);
 	}
 
-	/**
-	 * Displays a particular model.
-	 * @param integer $id the ID of the model to be displayed
-	 */
-    
-    // id parent_id label
+	    
     public function loadQTree() {
         $qs = Question::model()->findAll();
         $qtree= new Node();
@@ -103,14 +101,52 @@ class MedicalRecordController extends Controller
         
     }
     
+    /**
+     * Creates answers for models
+     */
+    
+    public function createAnswers(&$atree,&$node){
+        $atree->label = new Answer();
+        $atree->label->question_id = $node->id;
+        $atree->child = Array();
+        $atree->id = $node->id;
+        $atree->parent_id="1";
+        foreach ($node->child as $ch){
+            $n_node = new Node();
+            $this->createAnswers($n_node,$ch);
+            array_push($atree->child, $n_node);
+        }
+    }
+	
+    public function createATree() {
+        $this->atree = new Node();
+        $this->createAnswers($this->atree,$this->qtree);
+        return $this->atree;
+    }
+
+    
+    
+    
+	/**
+	 * Displays a particular model.
+	 * @param integer $id the ID of the model to be displayed
+	 */
+    
+    // id parent_id label
+    
+    
 	public function actionView($id)
 	{
+        $this->model = $this->loadModel($id);
+        $this->answers = $this->model->answers;
         $this->qtree = $this->loadQTree();
 		$this->render('view',array(
-			'model'=>$this->loadModel($id),
+			'model'=>$this->model,
             'qtree'=>$this->qtree,
 		));
 	}
+
+   
 
 	/**
 	 * Creates a new model.
@@ -119,19 +155,52 @@ class MedicalRecordController extends Controller
 	public function actionCreate()
 	{
 		$model=new MedicalRecord;
-
+        $this->qtree = $this->loadQTree();
+        $this->atree = $this->createATree();
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
-
+        $all_answers_valid = true;
+        
+        $answers_to_save = array();
 		if(isset($_POST['MedicalRecord']))
 		{
 			$model->attributes=$_POST['MedicalRecord'];
-			if($model->save())
-				$this->redirect(array('view','id'=>$model->id));
+            if (isset($_POST['Answer'])){
+                foreach($_POST['Answer'] as $index => $submitted_answer){
+                    $answer = new Answer;
+                    $answer->attributes = $submitted_answer;
+                    if (!$answer->validate()){
+                        $all_answers_valid = false;
+                    }
+                    else {
+                        array_push($answers_to_save,$answer);
+                    }
+                }
+                if ($all_answers_valid && $model->validate()){
+                    $trans = Yii::app()->db->beginTransaction();
+                    try{
+                        $model->save();
+                        foreach($answers_to_save as $ans){
+                            $ans->medical_record_id = $model->  id;
+                            $ans->save();
+                        }
+                        $trans->commit();
+                    } catch (Exception $e){
+                        $trans->rollback();
+                        Yii::log("Error occurred while saving. Rolling back... . Failure reason as reported in exception: " . $e->getMessage(), CLogger::LEVEL_ERROR, __METHOD__);
+                                            $success_saving_all = false;
+                    }
+    				$this->redirect(array('view','id'=>$model->id));
+                }
+            }
+			if($model->save()){
+            }
 		}
-
+        $this->atree = $this->createATree();
 		$this->render('create',array(
 			'model'=>$model,
+            'qtree'=>$this->qtree,
+            'atree'=>$this->atree,
 		));
 	}
 
@@ -143,7 +212,7 @@ class MedicalRecordController extends Controller
 	public function actionUpdate($id)
 	{
 		$model=$this->loadModel($id);
-
+        $this->qtree = $this->loadQTree();
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
@@ -153,9 +222,9 @@ class MedicalRecordController extends Controller
 			if($model->save())
 				$this->redirect(array('view','id'=>$model->id));
 		}
-
 		$this->render('update',array(
 			'model'=>$model,
+            'qtree'=>$this->qtree,
 		));
 	}
 

@@ -12,8 +12,13 @@
 )); ?>
 
 	<div class="row">
-		<?php echo $form->label($model,'text'); ?>
-		<?php echo $form->textArea($model,'text',array('rows'=>6, 'cols'=>50)); ?>
+		<?php echo $form->label($model,'id'); ?>
+		<?php echo $form->textField($model,'id'); ?>
+	</div>
+
+	<div class="row">
+		<?php echo $form->label($model,'medical_record_id'); ?>
+		<?php echo $form->textField($model,'medical_record_id'); ?>
 	</div>
 
 	<div class="row">
@@ -22,8 +27,8 @@
 	</div>
 
 	<div class="row">
-		<?php echo $form->label($model,'MR_id'); ?>
-		<?php echo $form->textField($model,'MR_id'); ?>
+		<?php echo $form->label($model,'answer'); ?>
+		<?php echo $form->textArea($model,'answer',array('rows'=>6, 'cols'=>50)); ?>
 	</div>
 
 	<div class="row buttons">

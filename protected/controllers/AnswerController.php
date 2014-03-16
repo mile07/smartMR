@@ -71,7 +71,7 @@ class AnswerController extends Controller
 		{
 			$model->attributes=$_POST['Answer'];
 			if($model->save())
-				$this->redirect(array('view','id'=>$model->question_id));
+				$this->redirect(array('view','id'=>$model->id));
 		}
 
 		$this->render('create',array(
@@ -95,7 +95,7 @@ class AnswerController extends Controller
 		{
 			$model->attributes=$_POST['Answer'];
 			if($model->save())
-				$this->redirect(array('view','id'=>$model->question_id));
+				$this->redirect(array('view','id'=>$model->id));
 		}
 
 		$this->render('update',array(

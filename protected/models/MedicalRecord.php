@@ -42,6 +42,8 @@ class MedicalRecord extends CActiveRecord
 		// class name for the relations automatically generated below.
 		return array(
             'user'=> array(self::BELONGS_TO,'User','user_id'),
+            'answers' => array(self::HAS_MANY,'Answer','medical_record_id'),
+            'answerCount' => array(self::STAT,'Answer','medical_record_id'),
 		);
 	}
 
