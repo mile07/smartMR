@@ -39,11 +39,23 @@ class MedicalRecordController extends Controller
     public $qtree;
     public $answers;
     public $model;
-    public $atree;
 
 	/**
 	 * @return array action filters
 	 */
+    
+    function mksec($sec){
+        if (sizeof($sec)===0){
+            return "_";
+        }
+        $ret = $sec[0];
+        for ($i = 1; $i < sizeof($sec); $i += 1){
+            $ret .= ".".$sec[$i];
+        }
+        return $ret;
+    }
+    
+        
 	public function filters()
 	{
 		return array(
@@ -107,6 +119,7 @@ class MedicalRecordController extends Controller
     
     public function createAnswers(&$atree,&$node){
         $atree->label = new Answer();
+    //    echo $node->id;
         $atree->label->question_id = $node->id;
         $atree->child = Array();
         $atree->id = $node->id;
@@ -119,9 +132,9 @@ class MedicalRecordController extends Controller
     }
 	
     public function createATree() {
-        $this->atree = new Node();
-        $this->createAnswers($this->atree,$this->qtree);
-        return $this->atree;
+        $atree = new Node();
+        $this->createAnswers($atree,$this->qtree);
+        return $atree;
     }
 
     
@@ -146,6 +159,33 @@ class MedicalRecordController extends Controller
 		));
 	}
 
+    function run_tree(&$count,$node,$sec,&$form){
+        if ($node->id != "1"){
+            
+            $padding = count($sec)*5;
+            echo "<div clas=\"row\" style=\"padding-left:".($padding-5)."%;\">section ".$this->mksec($sec)."</div>\n";
+            //$this->renderPartial('/answer/_form',array('model'=>$node->label,'from_mr'=>true));
+            $ans = "[$count]answer";
+            $questid = "[$count]question_id";
+            //$ans = 'answer';
+            echo $form->labelEx($node->label,$ans);
+            echo $form->textField($node->label,$ans);
+            echo $form->error($node->label,$ans);
+            echo $form->hiddenField($node->label,$questid,array('vaue'=>$node->label->question_id));
+            $node->label->question_id = 5;
+            echo "<div class=\"row\" style=\"padding-left:".$padding."%;\">".Question::model()->findByPk($node->id)->label."</div>\n";
+            //echo "<div class=\"row\" style=\"padding-left:".($padding)."%;\">".$node->label->answer."</div>";
+        }
+
+        $sec_count = 1;
+        foreach($node->child as $c){
+            array_push($sec,$sec_count);
+            $count += 1;
+            $this->run_tree($count,$c,$sec,$form);
+            $sec_count += 1;
+            array_pop($sec);
+        }
+    }
    
 
 	/**
@@ -156,7 +196,7 @@ class MedicalRecordController extends Controller
 	{
 		$model=new MedicalRecord;
         $this->qtree = $this->loadQTree();
-        $this->atree = $this->createATree();
+        $atree = $this->createATree();
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
         $all_answers_valid = true;
@@ -168,7 +208,10 @@ class MedicalRecordController extends Controller
             if (isset($_POST['Answer'])){
                 foreach($_POST['Answer'] as $index => $submitted_answer){
                     $answer = new Answer;
-                    $answer->attributes = $submitted_answer;
+                    //$answer->attributes = $submitted_answer;
+         //           echo "q_id = ";print_r($submitted_answer);//print_r($answer);
+                    $answer->answer = $submitted_answer['answer'];
+                    $answer->question_id = $submitted_answer['question_id'];
                     if (!$answer->validate()){
                         $all_answers_valid = false;
                     }
@@ -193,14 +236,13 @@ class MedicalRecordController extends Controller
     				$this->redirect(array('view','id'=>$model->id));
                 }
             }
-			if($model->save()){
-            }
+			//if($model->save()){
+            //}
 		}
-        $this->atree = $this->createATree();
 		$this->render('create',array(
 			'model'=>$model,
             'qtree'=>$this->qtree,
-            'atree'=>$this->atree,
+            'atree'=>$atree,
 		));
 	}
 
@@ -213,6 +255,7 @@ class MedicalRecordController extends Controller
 	{
 		$model=$this->loadModel($id);
         $this->qtree = $this->loadQTree();
+        $atree = $this->createATree();
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
@@ -225,6 +268,7 @@ class MedicalRecordController extends Controller
 		$this->render('update',array(
 			'model'=>$model,
             'qtree'=>$this->qtree,
+            'atree'=>$atree,
 		));
 	}
 

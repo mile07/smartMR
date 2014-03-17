@@ -43,6 +43,7 @@ class Answer extends CActiveRecord
 		// class name for the relations automatically generated below.
 		return array(
             'medical_record' => array(self::BELONGS_TO, 'MedicalRecord','medical_record_id'),
+            'question' => array(self::BELONGS_TO, 'Question','question_id'),
 		);
 	}
 

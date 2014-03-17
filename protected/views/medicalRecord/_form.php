@@ -26,39 +26,12 @@
 	</div>
     <div class="row">
         <div class="row">
-                    <?php
-                    $sections = Array();
-                    
-                    function mksec($sec){
-                        if (sizeof($sec)===0){
-                            return "_";
-                        }
-                        $ret = $sec[0];
-                        for ($i = 1; $i < sizeof($sec); $i += 1){
-                            $ret .= ".".$sec[$i];
-                        }
-                        return $ret;
-                    }
-                    function run_tree($that,$node,$sec){
-                        if ($node->id != "1"){
-                            
-                            $padding = count($sec)*5;
-                            echo "<div clas=\"row\" style=\"padding-left:".($padding-5)."%;\">section ".mksec($sec)."</div>\n";
-                            $that->renderPartial('/answer/_form',array('model'=>$node->label,'from_mr'=>true));
-                            echo "<div class=\"row\" style=\"padding-left:".$padding."%;\">".Question::model()->findByPk($node->id)->label."</div>\n";
-                            echo "<div class=\"row\" style=\"padding-left:".($padding)."%;\">".$node->label->answer."</div>";
-                        }
+    <?php
+        $sections = Array();
         
-                        $sec_count = 1;
-                        foreach($node->child as $c){
-                            array_push($sec,$sec_count);
-                            run_tree($that,$c,$sec);
-                            $sec_count += 1;
-                            array_pop($sec);
-                        }
-                    }
-                    run_tree($this,$atree,$sections);
-                    ?>
+        $count = 0;
+        $this->run_tree($count,$atree,array(),$form);
+    ?>
         </div>
     </div>
 
