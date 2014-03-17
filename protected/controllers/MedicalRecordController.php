@@ -130,14 +130,31 @@ class MedicalRecordController extends Controller
             array_push($atree->child, $n_node);
         }
     }
+    
+    public function loadAnswers($id,&$atree,&$node){
+        $atree->label = Answer::model()->findByAttributes(array('medical_record_id'=>$id,'question_id'=>$node->id));
+        $atree->child = Array();
+        $atree->id = $node->id;
+        $atree->parent_id="1";
+        foreach ($node->child as $ch){
+            $n_node = new Node();
+            $this->loadAnswers($id,$n_node,$ch);
+            array_push($atree->child,$n_node);
+        }
+    }
 	
     public function createATree() {
         $atree = new Node();
         $this->createAnswers($atree,$this->qtree);
         return $atree;
     }
-
     
+    public function loadATree($id) {
+        $atree = new Node();
+        $this->loadAnswers($id,$atree,$this->qtree);
+        //return $this->createATree();
+        return $atree;
+    }
     
     
 	/**
@@ -158,22 +175,29 @@ class MedicalRecordController extends Controller
             'qtree'=>$this->qtree,
 		));
 	}
-
+    function in_padding($s,$padding,$offset=0){
+        return "<div clas=\"row\" style=\"padding-left:".($padding-$offset)."%;\">".$s."</div>\n";
+    }
     function run_tree(&$count,$node,$sec,&$form){
+        
         if ($node->id != "1"){
             
             $padding = count($sec)*5;
-            echo "<div clas=\"row\" style=\"padding-left:".($padding-5)."%;\">section ".$this->mksec($sec)."</div>\n";
+            //echo "<div clas=\"row\" style=\"padding-left:".($padding-5)."%;\">section ".$this->mksec($sec)."</div>\n";
+            if (sizeof($node->child) > 0){
+                echo $this->in_padding("section ".$this->mksec($sec),$padding,5);
+            }
             //$this->renderPartial('/answer/_form',array('model'=>$node->label,'from_mr'=>true));
             $ans = "[$count]answer";
             $questid = "[$count]question_id";
+            echo $this->in_padding(Question::model()->findByPk($node->id)->label,$padding);
             //$ans = 'answer';
-            echo $form->labelEx($node->label,$ans);
-            echo $form->textField($node->label,$ans);
-            echo $form->error($node->label,$ans);
+            echo $this->in_padding($form->labelEx($node->label,$ans),$padding);
+            echo $this->in_padding($form->textField($node->label,$ans),$padding);
+            echo $this->in_padding($form->error($node->label,$ans),$padding);
             echo $form->hiddenField($node->label,$questid,array('vaue'=>$node->label->question_id));
             $node->label->question_id = 5;
-            echo "<div class=\"row\" style=\"padding-left:".$padding."%;\">".Question::model()->findByPk($node->id)->label."</div>\n";
+//            echo "<div class=\"row\" style=\"padding-left:".$padding."%;\">".Question::model()->findByPk($node->id)->label."</div>\n";
             //echo "<div class=\"row\" style=\"padding-left:".($padding)."%;\">".$node->label->answer."</div>";
         }
 
@@ -255,17 +279,50 @@ class MedicalRecordController extends Controller
 	{
 		$model=$this->loadModel($id);
         $this->qtree = $this->loadQTree();
-        $atree = $this->createATree();
+        $atree = $this->loadATree($id);
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
+        $all_answers_valid = true;
+        
+        $answers_to_save = array();
 		if(isset($_POST['MedicalRecord']))
 		{
 			$model->attributes=$_POST['MedicalRecord'];
-			if($model->save())
-				$this->redirect(array('view','id'=>$model->id));
+            if (isset($_POST['Answer'])){
+                foreach($_POST['Answer'] as $index => $submitted_answer){
+                    //$answer->attributes = $submitted_answer;
+         //           echo "q_id = ";print_r($submitted_answer);//print_r($answer);
+                    $answer = Answer::model()->findByAttributes(array('medical_record_id'=>$id,'question_id'=>$submitted_answer['question_id']));
+                    $answer->answer = $submitted_answer['answer'];
+                    if (!$answer->validate()){
+                        $all_answers_valid = false;
+                    }
+                    else {
+                        array_push($answers_to_save,$answer);
+                    }
+                }
+                if ($all_answers_valid && $model->validate()){
+                    $trans = Yii::app()->db->beginTransaction();
+                    try{
+                        $model->save();
+                        foreach($answers_to_save as $ans){
+                            $ans->medical_record_id = $model->  id;
+                            $ans->save();
+                        }
+                        $trans->commit();
+                    } catch (Exception $e){
+                        $trans->rollback();
+                        Yii::log("Error occurred while saving. Rolling back... . Failure reason as reported in exception: " . $e->getMessage(), CLogger::LEVEL_ERROR, __METHOD__);
+                                            $success_saving_all = false;
+                    }
+    				$this->redirect(array('view','id'=>$model->id));
+                }
+            }
+			//if($model->save()){
+            //}
 		}
-		$this->render('update',array(
+		$this->render('create',array(
 			'model'=>$model,
             'qtree'=>$this->qtree,
             'atree'=>$atree,

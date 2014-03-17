@@ -29,8 +29,7 @@ $this->menu=array(
 ));
 */
  ?>
-
-
+ <?php $atree= $this->loadATree($model->id); ?>
 <div  id="answers">
     <?php 
     if ($model->answerCount > 0){?>
@@ -38,42 +37,7 @@ $this->menu=array(
          <?php $this->renderPartial('_answers',array(
             'medical_record'=>$model,
             'answers'=>$model->answers,
+            'atree'=>$atree
          )); ?>
      <?php } ?>
 </div>
-<!--comment
-<div style="padding-top:10px">
-    <?php
-    $sections = Array();
-    
-    function mksec($sec){
-        if (sizeof($sec)===0){
-            return "_";
-        }
-        $ret = $sec[0];
-        for ($i = 1; $i < sizeof($sec); $i += 1){
-            $ret .= ".".$sec[$i];
-        }
-        
-        return $ret;
-    }
-    
-    function run_tree($node,$sec){
-        if ($node->label != "/"){
-            echo "section ".mksec($sec)."<br>";
-            echo $node->label."<br>";
-        }
-        
-        $sec_count = 1;
-        foreach($node->child as $c){
-            array_push($sec,$sec_count);
-            run_tree($c,$sec);
-            $sec_count += 1;
-            array_pop($sec);
-        }
-    }
-    run_tree($qtree,$sections);
-    ?>
-</div>
-    
-    -->

@@ -94,4 +94,11 @@ class MedicalRecord extends CActiveRecord
 	{
 		return parent::model($className);
 	}
+    
+    public function beforeDelete() {
+        foreach ($this->answers as $ans){
+            $ans->delete();
+        }
+        return parent::beforeDelete();
+    }
 }
