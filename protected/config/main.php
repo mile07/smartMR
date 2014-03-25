@@ -6,8 +6,10 @@ function fatal_handler() {
       $errstr  = "shutdown";
       $errno   = E_CORE_ERROR;
       $errline = 0;
-
-      $error = error_get_last();
+      if ($errno == 0){
+        return;
+      }
+      $error = error_get_last   ();
 
       if( $error !== NULL) {
         $errno   = $error["type"];
@@ -34,7 +36,7 @@ function format_error( $errno, $errstr, $errfile, $errline ) {
 }
 
 
-register_shutdown_function( "fatal_handler" );
+//register_shutdown_function( "fatal_handler" );
 
 // uncomment the following to define a path alias
 // Yii::setPathOfAlias('local','path/to/local-folder');
@@ -43,7 +45,7 @@ register_shutdown_function( "fatal_handler" );
 // CWebApplication properties can be configured here.
 return array(
 	'basePath'=>dirname(__FILE__).DIRECTORY_SEPARATOR.'..',
-	'name'=>'My Web Application',
+	'name'=>'smartMR',
 
 	// preloading 'log' component
 	'preload'=>array('log'),
@@ -110,9 +112,9 @@ return array(
 				),
 				// uncomment the following to show log messages on web pages
 				
-				array(
-					'class'=>'CWebLogRoute',
-				),
+//				array(
+//					'class'=>'CWebLogRoute',
+//				),
 				
 			),
 		),

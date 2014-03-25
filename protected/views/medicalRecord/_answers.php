@@ -16,8 +16,13 @@
             $questid = "[$count]question_id";
             echo $that->in_padding(Question::model()->findByPk($node->id)->label,$padding);
             //$ans = 'answer';
-            echo $that->in_padding($node->label->answer,$padding);
-            $node->label->question_id = 5;
+            if (!$node->label){
+                echo $that->in_padding("No answer",$padding);
+            }
+            else {
+                echo $that->in_padding($node->label->answer,$padding);
+                $node->label->question_id = 5;
+            }
 //            echo "<div class=\"row\" style=\"padding-left:".$padding."%;\">".Question::model()->findByPk($node->id)->label."</div>\n";
             //echo "<div class=\"row\" style=\"padding-left:".($padding)."%;\">".$node->label->answer."</div>";
         }
