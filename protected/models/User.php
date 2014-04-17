@@ -99,6 +99,17 @@ class User extends CActiveRecord
 	}
     
     
+    public function beforeSave() {
+        if (parent::beforeSave() && $this->isNewRecord){
+            if (User::model()->find('username = ?',array($this->username))){
+                return false;
+                
+            }
+            $this->password = $this->hashPassword($this->password);
+            return true;
+        }
+    }
+    
     //--- SELF DEFINED FUNCTIONS
     public function validatePassword($password){
         return CPasswordHelper::verifyPassword($password,$this->password);

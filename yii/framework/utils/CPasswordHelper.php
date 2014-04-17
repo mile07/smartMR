@@ -111,10 +111,7 @@ class CPasswordHelper
 	{
 		self::checkBlowfish();
 		if(!is_string($password) || $password==='')
-			return false;
-        if (!preg_match('{^\$2[axy]\$(\d\d)\$[\./0-9A-Za-z]{22}}',$hash,$matches)) {//DANGER! REMOVE
-            $hash = CPasswordHelper::hashPassword($hash);
-        }
+			return false;   
 		if (!$password || !preg_match('{^\$2[axy]\$(\d\d)\$[\./0-9A-Za-z]{22}}',$hash,$matches) ||
 			$matches[1]<4 || $matches[1]>31)
 			return false;
@@ -158,7 +155,6 @@ class CPasswordHelper
 		$check=0;
 		for($i=0;$i<$length;$i+=1)
 			$check|=(ord($a[$i])^ord($b[$i]));
-
 		return $check===0;
 	}
 

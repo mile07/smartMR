@@ -19,3 +19,4 @@ $this->menu=array(
 <h1>Update MedicalRecord <?php echo $model->id; ?></h1>
 
 <?php $this->renderPartial('_form', array('model'=>$model,'qtree'=>$qtree,'atree'=>$atree)); ?>
+

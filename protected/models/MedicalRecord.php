@@ -12,6 +12,21 @@ class MedicalRecord extends CActiveRecord
 	/**
 	 * @return string the associated database table name
 	 */
+    
+    public function saveHelpers($helpers){
+        $helpers = array_map('trim',explode(",",$helpers));
+        foreach ($helpers as $help){
+            $usr = User::model()->find('username = ?',array($help));
+            if (!$usr){
+                return false;
+            }
+            if (!in_array($usr,$this->helpers)){
+                Yii::app()->db->createCommand()->insert("tbl_helper",array("medical_record_id"=>$this->id,"user_id"=>$usr->id));
+            }
+        }
+        return true;
+    }
+    
 	public function tableName()
 	{
 		return '{{medicalRecord}}';
@@ -44,6 +59,7 @@ class MedicalRecord extends CActiveRecord
             'user'=> array(self::BELONGS_TO,'User','user_id'),
             'answers' => array(self::HAS_MANY,'Answer','medical_record_id'),
             'answerCount' => array(self::STAT,'Answer','medical_record_id'),
+            'helpers' => array(self::MANY_MANY,'User','tbl_helper(medical_record_id,user_id)'),
 		);
 	}
 
@@ -94,6 +110,14 @@ class MedicalRecord extends CActiveRecord
 	{
 		return parent::model($className);
 	}
+    
+    public function beforeSave() {
+        if (parent::beforeSave() && $this->isNewRecord){
+            $this->user_id = Yii::app()->user->id;
+            return true;
+        }
+        return false;
+    }
     
     public function beforeDelete() {
         foreach ($this->answers as $ans){

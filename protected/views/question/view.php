@@ -24,5 +24,6 @@ $this->menu=array(
 		'id',
 		'parent_id',
 		'label',
+        'type',
 	),
 )); ?>

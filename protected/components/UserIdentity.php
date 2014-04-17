@@ -21,12 +21,10 @@ class UserIdentity extends CUserIdentity
 	public function authenticate(){
         $username=strtolower($this->username);
         $user=User::model()->find('username = ?',array($username));
-        echo strcmp($user->password,$this->password). "<br>";
         if($user===null){
             $this->errorCode=self::ERROR_USERNAME_INVALID;
         }
         else if(!$user->validatePassword($this->password)){
-            echo "WP";
             $this->errorCode=self::ERROR_PASSWORD_INVALID;
         }
         else {

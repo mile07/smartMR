@@ -7,6 +7,15 @@ $this->breadcrumbs=array(
 	'Create',
 );
 
+if (Yii::app()->user->hasFlash('error')){
+    ?>
+    <div class="flash-error">
+        <?php echo Yii::app()->user->getFlash('error'); ?>
+    </div>
+    
+    <?php
+}
+
 $this->menu=array(
 	array('label'=>'List User', 'url'=>array('index')),
 	array('label'=>'Manage User', 'url'=>array('admin')),

@@ -41,3 +41,12 @@ $this->menu=array(
          )); ?>
      <?php } ?>
 </div>
+
+
+<?php
+ if (Yii::app()->user->hasFlash('helpers')){
+            ?>
+            <div class="flash-error">
+                Invalid Username
+            </div><?php
+        } ?>

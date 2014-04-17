@@ -40,6 +40,16 @@ class MedicalRecordController extends Controller
     public $answers;
     public $model;
 
+    public function getHelpersAsString($model) {
+        $helpers = $model->helpers;
+        $helpersStr = array();
+        foreach ($helpers as $help){
+            array_push($helpersStr,$help->username);
+        }
+        return join(',',$helpersStr);
+    }
+
+
 	/**
 	 * @return array action filters
 	 */
@@ -190,13 +200,24 @@ class MedicalRecordController extends Controller
             //$this->renderPartial('/answer/_form',array('model'=>$node->label,'from_mr'=>true));
             $ans = "[$count]answer";
             $questid = "[$count]question_id";
-            echo $this->in_padding(Question::model()->findByPk($node->id)->label,$padding);
+            $question = Question::model()->findByPk($node->id);
+            echo $this->in_padding($question->label,$padding);
             //$ans = 'answer';
             echo $this->in_padding($form->labelEx($node->label,$ans),$padding);
-            echo $this->in_padding($form->textField($node->label,$ans),$padding);
+            if ($question->type == "single"){
+                $options = $question->options;
+                echo $this->in_padding($form->dropDownList($node->label,$ans,CHtml::listData($options,'option','option')),$padding);
+            }
+            else if ($question->type == "multiple"){
+                $options = $question->options;
+                echo $this->in_padding($form->checkBoxList($node->label,$ans,CHtml::listData($options,'option','option')),$padding);
+            }
+            else {
+                echo $this->in_padding($form->textField($node->label,$ans),$padding);
+            }
             echo $this->in_padding($form->error($node->label,$ans),$padding);
             echo $form->hiddenField($node->label,$questid,array('vaue'=>$node->label->question_id));
-            $node->label->question_id = 5;
+            
 //            echo "<div class=\"row\" style=\"padding-left:".$padding."%;\">".Question::model()->findByPk($node->id)->label."</div>\n";
             //echo "<div class=\"row\" style=\"padding-left:".($padding)."%;\">".$node->label->answer."</div>";
         }
@@ -226,9 +247,11 @@ class MedicalRecordController extends Controller
         $all_answers_valid = true;
         
         $answers_to_save = array();
-		if(isset($_POST['MedicalRecord']))
-		{
-			$model->attributes=$_POST['MedicalRecord'];
+            
+            if (isset($_POST['helpers'])){
+                $model->saveHelpers($_POST['helpers']);
+            }
+            
             if (isset($_POST['Answer'])){
                 foreach($_POST['Answer'] as $index => $submitted_answer){
                     $answer = new Answer;
@@ -243,6 +266,7 @@ class MedicalRecordController extends Controller
                         array_push($answers_to_save,$answer);
                     }
                 }
+                
                 if ($all_answers_valid && $model->validate()){
                     $trans = Yii::app()->db->beginTransaction();
                     try{
@@ -259,10 +283,10 @@ class MedicalRecordController extends Controller
                     }
     				$this->redirect(array('view','id'=>$model->id));
                 }
-            }
 			//if($model->save()){
             //}
 		}
+//        var_dump($_POST);
 		$this->render('create',array(
 			'model'=>$model,
             'qtree'=>$this->qtree,
@@ -278,6 +302,10 @@ class MedicalRecordController extends Controller
 	public function actionUpdate($id)
 	{
 		$model=$this->loadModel($id);
+        $userId = Yii::app()->user->id;
+        if ($userId != $model->user_id && !in_array(User::model()->findByPk(Yii::app()->user->id),$model->helpers)){
+            throw new CHttpException(403,'You are not authorized to perform this action.');
+        }
         $this->qtree = $this->loadQTree();
         $atree = $this->loadATree($id);
 		// Uncomment the following line if AJAX validation is needed
@@ -286,9 +314,11 @@ class MedicalRecordController extends Controller
         $all_answers_valid = true;
         
         $answers_to_save = array();
-		if(isset($_POST['MedicalRecord']))
-		{
-			$model->attributes=$_POST['MedicalRecord'];
+            if (isset($_POST['helpers'])){
+                if (!$model->saveHelpers($_POST['helpers'])){
+                    Yii::app()->user->setFlash('helpers',"Invalid username");
+                }
+            }
             if (isset($_POST['Answer'])){
                 foreach($_POST['Answer'] as $index => $submitted_answer){
                     //$answer->attributes = $submitted_answer;
@@ -318,7 +348,6 @@ class MedicalRecordController extends Controller
                     }
     				$this->redirect(array('view','id'=>$model->id));
                 }
-            }
 			//if($model->save()){
             //}
 		}

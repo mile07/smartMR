@@ -19,11 +19,6 @@
 
 	<?php echo $form->errorSummary($model); ?>
 
-	<div class="row">
-		<?php echo $form->labelEx($model,'user_id'); ?>
-		<?php echo $form->textField($model,'user_id'); ?>
-		<?php echo $form->error($model,'user_id'); ?>
-	</div>
     <div class="row">
         <div class="row">
     <?php
@@ -34,7 +29,17 @@
     ?>
         </div>
     </div>
-
+        <?php
+        if (Yii::app()->user->hasFlash('helpers')){
+            ?>
+            <div class="flash-error">
+                <?php Yii::ap()->user->getFlash('helpers'); ?>
+            </div><?php
+        }
+        
+        ?>
+        <?php echo CHtml::label("Helpers",'helpers'); ?>
+   		<?php echo CHtml::textField('helpers',$this->getHelpersAsString($model)); ?>
 	<div class="row buttons">
 		<?php echo CHtml::submitButton($model->isNewRecord ? 'Create' : 'Save'); ?>
 	</div>
