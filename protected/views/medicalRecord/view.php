@@ -42,6 +42,7 @@ $this->menu=array(
      <?php } ?>
 </div>
 
+<?= CHtml::link('Generate Printable Version',array('medicalrecord/pdf','id'=>$model->id));?>
 
 <?php
  if (Yii::app()->user->hasFlash('helpers')){

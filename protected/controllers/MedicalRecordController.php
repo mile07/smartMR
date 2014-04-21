@@ -88,7 +88,7 @@ class MedicalRecordController extends Controller
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
 				//'actions'=>array('create','update'),
-				'users'=>array('@'),
+				'users'=>array('@','pdf'),
 			),
 			/*array('allow', // allow admin user to perform 'admin' and 'delete' actions
 				'actions'=>array('admin','delete'),
@@ -371,7 +371,19 @@ class MedicalRecordController extends Controller
 		if(!isset($_GET['ajax']))
 			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('admin'));
 	}
-
+    
+    
+    public function actionPDF($id){
+        $model =  $this->loadModel($id);
+        $this->qtree = $this->loadQTree();
+        $atree = $this->loadATree($id);
+        $this->renderPartial('pdf',array(
+           'model'=>$model,
+           'qtree'=>$this->qtree,
+           'atree'=>$atree, 
+        ));
+    }
+    
 	/**
 	 * Lists all models.
 	 */
