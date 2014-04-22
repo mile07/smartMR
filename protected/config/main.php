@@ -46,6 +46,7 @@ register_shutdown_function( "fatal_handler" );
 return array(
 	'basePath'=>dirname(__FILE__).DIRECTORY_SEPARATOR.'..',
 	'name'=>'smartMR',
+	'theme'=>'abound',
 
 	// preloading 'log' component
 	'preload'=>array('log'),
