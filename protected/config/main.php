@@ -36,7 +36,7 @@ function format_error( $errno, $errstr, $errfile, $errline ) {
 }
 
 //uncomment to show stack php
-//register_shutdown_function( "fatal_handler" );
+register_shutdown_function( "fatal_handler" );
 
 // uncomment the following to define a path alias
 // Yii::setPathOfAlias('local','path/to/local-folder');
